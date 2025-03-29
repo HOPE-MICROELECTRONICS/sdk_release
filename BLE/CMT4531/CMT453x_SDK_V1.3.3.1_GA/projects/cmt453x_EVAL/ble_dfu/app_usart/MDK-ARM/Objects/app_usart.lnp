@@ -1,0 +1,22 @@
+--cpu Cortex-M0
+".\objects\startup_cmt453x.o"
+".\objects\system_cmt453x.o"
+".\objects\misc.o"
+".\objects\cmt453x_crc.o"
+".\objects\cmt453x_gpio.o"
+".\objects\cmt453x_pwr.o"
+".\objects\cmt453x_rcc.o"
+".\objects\cmt453x_usart.o"
+".\objects\cmt453x_qflash.o"
+".\objects\main.o"
+".\objects\hp_error.o"
+".\objects\hp_scheduler.o"
+".\objects\dfu_usart.o"
+".\objects\dfu_led.o"
+".\objects\dfu_crc.o"
+".\objects\dfu_delay.o"
+".\objects\hp_dfu_boot.o"
+--library_type=microlib --strict --scatter ".\Objects\app_usart.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings\app_usart.map" -o .\Objects\app_usart.axf

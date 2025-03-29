@@ -1,0 +1,4 @@
+savebin          ROM.bin    0x00000000              0x30000
+r
+g
+q

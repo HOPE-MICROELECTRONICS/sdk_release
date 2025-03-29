@@ -1,0 +1,174 @@
+/***************************************************************************//**
+* # License
+* Copyright 2023 Shenzhen HOPE Microelectronics Co., Ltd. 
+* All rights reserved.
+* 
+* IMPORTANT: All rights of this software belong to Shenzhen HOPE 
+* Microelectronics Co., Ltd. ("HOPERF"). Your use of this Software is limited 
+* to those specific rights granted under the terms of the business contract, 
+* the confidential agreement, the non-disclosure agreement and any other forms 
+* of agreements as a customer or a partner of HOPERF. You may not use this 
+* Software unless you agree to abide by the terms of these agreements. 
+* You acknowledge that the Software may not be modified, copied, 
+* distributed or disclosed unless embedded on a HOPERF Bluetooth Low Energy 
+* (BLE) integrated circuit, either as a product or is integrated into your 
+* products.  Other than for the aforementioned purposes, you may not use, 
+* reproduce, copy, prepare derivative works of, modify, distribute, perform, 
+* display or sell this Software and/or its documentation for any purposes.
+* 
+* YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE 
+* PROVIDED AS IS WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, 
+* INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE, 
+* NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL 
+* HOPERF OR ITS SUBSIDIARIES BE LIABLE OR OBLIGATED UNDER CONTRACT, 
+* NEGLIGENCE, STRICT LIABILITY, CONTRIBUTION, BREACH OF WARRANTY, OR OTHER 
+* LEGAL EQUITABLE THEORY ANY DIRECT OR INDIRECT DAMAGES OR EXPENSES INCLUDING 
+* BUT NOT LIMITED TO ANY INCIDENTAL, SPECIAL, INDIRECT, PUNITIVE OR 
+* CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF PROCUREMENT OF 
+* SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES 
+* (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.  
+*******************************************************************************/
+
+/**
+ * @file cmt453x_it.c
+ * @version v1.0.0
+ *
+  */
+#include "cmt453x_it.h"
+#include "main.h"
+
+/** @addtogroup CMT453X_StdPeriph_Template
+ * @{
+ */
+
+extern uint8_t TxBuffer1[];
+extern uint8_t TxBuffer2[];
+extern uint8_t RxBuffer1[];
+extern uint8_t RxBuffer2[];
+extern __IO uint8_t TxCounter1;
+extern __IO uint8_t TxCounter2;
+extern __IO uint8_t RxCounter1;
+extern __IO uint8_t RxCounter2;
+extern uint8_t NbrOfDataToTransfer1;
+extern uint8_t NbrOfDataToTransfer2;
+extern uint8_t NbrOfDataToRead1;
+extern uint8_t NbrOfDataToRead2;
+
+/******************************************************************************/
+/*            Cortex-M0 Processor Exceptions Handlers                         */
+/******************************************************************************/
+
+/**
+ * @brief  This function handles NMI exception.
+ */
+void NMI_Handler(void)
+{
+}
+
+/**
+ * @brief  This function handles Hard Fault exception.
+ */
+void HardFault_Handler(void)
+{
+    /* Go to infinite loop when Hard Fault exception occurs */
+    while (1)
+    {
+    }
+}
+
+/**
+ * @brief  This function handles SVCall exception.
+ */
+void SVC_Handler(void)
+{
+}
+
+/**
+ * @brief  This function handles PendSV_Handler exception.
+ */
+void PendSV_Handler(void)
+{
+}
+
+/**
+ * @brief  This function handles SysTick Handler.
+ */
+void SysTick_Handler(void)
+{
+}
+
+/******************************************************************************/
+/*                 CMT453X Peripherals Interrupt Handlers                     */
+/*  Add here the Interrupt Handler for the used peripheral(s) (PPP), for the  */
+/*  available peripheral interrupt handler's name please refer to the startup */
+/*  file (startup_cmt453x.s).                                                 */
+/******************************************************************************/
+
+/**
+ * @brief  This function handles USARTy global interrupt request.
+ */
+void LPUARTy_IRQHandler(void)
+{
+    if (LPUART_GetIntStatus(LPUARTy, LPUART_INT_FIFO_NE) != RESET)
+    {
+        /* Read one byte from the receive data register */
+        RxBuffer1[RxCounter1++] = LPUART_ReceiveData(LPUARTy);
+
+        if (RxCounter1 == NbrOfDataToRead1)
+        {
+            /* Disable the LPUARTy Receive interrupt */
+            LPUART_ConfigInt(LPUARTy, LPUART_INT_FIFO_NE, DISABLE);
+        }
+    }
+
+    if (LPUART_GetIntStatus(LPUARTy, LPUART_INT_TXC) != RESET)
+    {
+        ++TxCounter1;        
+         
+        /* Clear TXC Pending Bit */
+        LPUART_ClrIntPendingBit(LPUARTy, LPUART_INT_TXC);        
+        
+        /* Write one byte to the transmit data register */
+        LPUART_SendData(LPUARTy, TxBuffer1[TxCounter1]);        
+
+        if (TxCounter1 == NbrOfDataToTransfer1)
+        {
+            /* Disable the LPUARTy Transmit interrupt */
+            LPUART_ConfigInt(LPUARTy, LPUART_INT_TXC, DISABLE);
+        }
+    }        
+}
+
+/**
+ * @brief  This function handles USARTz global interrupt request.
+ */
+void USARTz_IRQHandler(void)
+{
+    if (USART_GetIntStatus(USARTz, USART_INT_RXDNE) != RESET)
+    {
+        /* Read one byte from the receive data register */
+        RxBuffer2[RxCounter2++] = USART_ReceiveData(USARTz);
+
+        if (RxCounter2 == NbrOfDataToRead1)
+        {
+            /* Disable the USARTz Receive interrupt */
+            USART_ConfigInt(USARTz, USART_INT_RXDNE, DISABLE);
+        }
+    }
+
+    if (USART_GetIntStatus(USARTz, USART_INT_TXDE) != RESET)
+    {
+        /* Write one byte to the transmit data register */
+        USART_SendData(USARTz, TxBuffer2[TxCounter2++]);
+
+        if (TxCounter2 == NbrOfDataToTransfer2)
+        {
+            /* Disable the USARTz Transmit interrupt */
+            USART_ConfigInt(USARTz, USART_INT_TXDE, DISABLE);
+        }
+    }   
+}
+
+/**
+ * @}
+ */
